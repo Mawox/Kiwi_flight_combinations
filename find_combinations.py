@@ -1,6 +1,7 @@
-import pandas as pd
-import numpy as np
 import sys
+
+import numpy as np
+import pandas as pd
 
 # Read data from stdin
 flight_data = pd.read_csv(sys.stdin)
@@ -70,4 +71,4 @@ for num_bags in range(3):
 
         result += [connection]
 
-        print(*result)
+        print(result)
