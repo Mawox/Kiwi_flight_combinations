@@ -24,7 +24,7 @@ def add_connections(flight_ids):
     out = [flight_ids]
 
     # look at all the possible connections from the last destination of the flight
-    for possible_connection in possible_connections[flight_ids[-1]].loc[possible_connections[flight_ids[-1]]].index:
+    for possible_connection in possible_connections.index[possible_connections[flight_ids[-1]]]:
         new_connection = flight_ids + [possible_connection]
 
         # check if flying from a destination more than once, i.e. visiting a destination twice. Arriving at a
@@ -65,7 +65,6 @@ for num_bags in range(3):
         result += [flight_data.iloc[connection[-1]].arrival]
         result += [sum(flight_data.iloc[connection].loc[:, "price"]) +
                    sum(flight_data.iloc[connection].loc[:, "bag_price"]) * num_bags]
-
         result += [connection]
 
         print(result)
