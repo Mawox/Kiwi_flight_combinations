@@ -55,7 +55,7 @@ all_connections = pd.DataFrame(data={"connections": all_connections, "bags_allow
 
 # Print out all solutions
 for num_bags in range(3):
-    print("Options for ", num_bags, "bags.")
+    print("Options for ", num_bags, "bag(s).")
     print("source, stops(s), destination, departure, arrival, total_price_incl_bags, flight_ids")
     for connection in all_connections.loc[all_connections["bags_allowed"] >= num_bags, "connections"].values:
         result = [flight_data.iloc[connection[0]].source]
