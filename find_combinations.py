@@ -34,7 +34,6 @@ def add_connections(flight_ids):
             continue
 
         # save the connection and recursively check for more connections
-        out += [new_connection]
         out += add_connections(new_connection)
 
     return out
