@@ -1,5 +1,4 @@
 import sys
-
 import numpy as np
 import pandas as pd
 
@@ -53,16 +52,14 @@ for connection in all_connections:
 
 all_connections = pd.DataFrame(data={"connections": all_connections, "bags_allowed": max_bags})
 
+
 # Print out all solutions
 for num_bags in range(3):
     print("Options for ", num_bags, "bags.")
-    print("source, stops(s)('direct' if no stop), destination, departure, arrival, total_price_incl_bags, flight_ids")
+    print("source, stops(s), destination, departure, arrival, total_price_incl_bags, flight_ids")
     for connection in all_connections.loc[all_connections["bags_allowed"] >= num_bags, "connections"].values:
         result = [flight_data.iloc[connection[0]].source]
-        if len(connection) < 2:
-            result += ["direct"]
-        else:
-            result += [flight_data.iloc[connection[1:]].source.values.tolist()]
+        result += [flight_data.iloc[connection[1:]].source.values.tolist()]
         result += [flight_data.iloc[connection[-1]].destination]
         result += [flight_data.iloc[connection[0]].departure]
         result += [flight_data.iloc[connection[-1]].arrival]
