@@ -4,13 +4,12 @@ import pandas as pd
 import config as cfg
 
 
-
 # Function looks in the connections array and adds all possible connections, recursively
-def add_connections(flight_ids, possible_matrix, flights_data):
+def add_connections(flight_ids, possible_connections, flights_data):
     out = [flight_ids]
 
     # look at all the possible connections from the last destination of the flight
-    for possible_connection in possible_matrix.index[possible_matrix[flight_ids[-1]]]:
+    for possible_connection in possible_connections.index[possible_connections[flight_ids[-1]]]:
         new_connection = flight_ids + [possible_connection]
 
         # check if flying from a destination more than once, i.e. visiting a destination twice. Arriving at a
@@ -20,7 +19,7 @@ def add_connections(flight_ids, possible_matrix, flights_data):
             continue
 
         # save the connection and recursively check for more connections
-        out += add_connections(new_connection, possible_matrix, flights_data)
+        out += add_connections(new_connection, possible_connections, flights_data)
 
     return out
 
@@ -84,15 +83,13 @@ def find_combinations_for_bags(all_connections):
     max_bags = []
     for connection in all_connections:
         max_bags += [min(flight_data.iloc[connection].loc[:, "bags_allowed"])]
-    7+"a"
+
     return pd.DataFrame(data={"connections": all_connections, "bags_allowed": max_bags})
 
 
 if __name__ == "__main__":
     flight_data = read_and_preprocess_data()
-
     possible_connections = find_possible_connections(flight_data)
     all_connections = find_all_connections(possible_connections, flight_data)
     all_connections = find_combinations_for_bags(all_connections)
-
     print_solution(flight_data, all_connections)
