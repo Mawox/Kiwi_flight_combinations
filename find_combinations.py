@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import pandas as pd
+import config as cfg
+
 
 
 # Function looks in the connections array and adds all possible connections, recursively
@@ -18,47 +20,22 @@ def add_connections(flight_ids, possible_matrix, flights_data):
             continue
 
         # save the connection and recursively check for more connections
-        out += add_connections(new_connection)
+        out += add_connections(new_connection, possible_matrix, flights_data)
 
     return out
 
 
-def main_fnc():
-    # Read data from stdin
-    #flight_data = pd.read_csv(sys.stdin)
-    flight_data = pd.read_csv("input.csv")
-
-    # Convert arrival and departure to datetime
-    flight_data["arrival"] = pd.to_datetime(flight_data["arrival"])
-    flight_data["departure"] = pd.to_datetime(flight_data["departure"])
-
-    # Precompute an array with all connections between flights
-    possible_connections = pd.DataFrame(np.zeros([len(flight_data), len(flight_data)]))
-
-    for flight_id in flight_data.index:
-        flight = flight_data.iloc[flight_id]
-        possible_connections[flight_id] = ((flight_data["source"] == flight.destination) &
-                                           (flight_data["departure"] >= flight.arrival + pd.offsets.Hour(1)) &
-                                           (flight_data["departure"] <= flight.arrival + pd.offsets.Hour(4)))
-
-
-
-
-    # find all possible connections for each flight
+# find all possible connections for each flight
+def find_all_connections(possible_connections, flight_data):
     all_connections = []
     for i in flight_data.index:
         all_connections += add_connections([i], possible_connections, flight_data)
-
-    # check the maximum number of bags for each flight
-    max_bags = []
-    for connection in all_connections:
-        max_bags += [min(flight_data.iloc[connection].loc[:, "bags_allowed"])]
-
-    all_connections = pd.DataFrame(data={"connections": all_connections, "bags_allowed": max_bags})
+    return all_connections
 
 
+def print_solution(flight_data, all_connections, min_bags=0, max_bags=3):
     # Print out all solutions
-    for num_bags in range(3):
+    for num_bags in range(min_bags, max_bags):
         print("Options for ", num_bags, "bag(s).")
         print("source, stops(s), destination, departure, arrival, total_price_incl_bags, flight_ids")
         for connection in all_connections.loc[all_connections["bags_allowed"] >= num_bags, "connections"].values:
@@ -73,6 +50,49 @@ def main_fnc():
 
             print(result)
 
-if __name__ == "__main__":
-    main_fnc()
 
+def read_and_preprocess_data():
+    # Read data from stdin
+    if cfg.debug:
+        source = "input.csv"
+    else:
+        source = sys.stdin
+
+    flight_data = pd.read_csv(source)
+
+    # Convert arrival and departure to datetime
+    flight_data["arrival"] = pd.to_datetime(flight_data["arrival"])
+    flight_data["departure"] = pd.to_datetime(flight_data["departure"])
+
+    return flight_data
+
+def find_possible_connections(flight_data):
+
+    # Precompute an array with all connections between flights
+    possible_connections = pd.DataFrame(np.zeros([len(flight_data), len(flight_data)]))
+
+    for flight_id in flight_data.index:
+        flight = flight_data.iloc[flight_id]
+        possible_connections[flight_id] = ((flight_data["source"] == flight.destination) &
+                                           (flight_data["departure"] >= flight.arrival + pd.offsets.Hour(1)) &
+                                           (flight_data["departure"] <= flight.arrival + pd.offsets.Hour(4)))
+    return possible_connections
+
+
+def find_combinations_for_bags(all_connections):
+    # check the maximum number of bags for each flight
+    max_bags = []
+    for connection in all_connections:
+        max_bags += [min(flight_data.iloc[connection].loc[:, "bags_allowed"])]
+    7+"a"
+    return pd.DataFrame(data={"connections": all_connections, "bags_allowed": max_bags})
+
+
+if __name__ == "__main__":
+    flight_data = read_and_preprocess_data()
+
+    possible_connections = find_possible_connections(flight_data)
+    all_connections = find_all_connections(possible_connections, flight_data)
+    all_connections = find_combinations_for_bags(all_connections)
+
+    print_solution(flight_data, all_connections)
